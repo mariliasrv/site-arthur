@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}A chegada do Arthur{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <div class="container header-inner">
+          <a class="brand" href="{{ url_for('public.home') }}">
+            <span class="brand-ornament" aria-hidden="true">✿</span>
+            <span class="brand-title">A chegada do bebê</span>
+            <span class="brand-ornament brand-ornament--mirror" aria-hidden="true">✿</span>
+          </a>
+
+          <button
+            type="button"
+            class="nav-toggle"
+            aria-expanded="false"
+            aria-controls="site-nav"
+            aria-label="Abrir menu"
+          >
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </button>
+
+          <nav id="site-nav" class="site-nav" aria-label="Navegação">
+            <a class="nav-link" href="{{ url_for('public.home') }}">Início</a>
+            <span class="nav-pipe" aria-hidden="true">|</span>
+            <a class="nav-link" href="{{ url_for('public.gifts') }}">Lista de presentes</a>
+          </nav>
+        </div>
+      </header>
+
+      <main class="container content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+    <script>
+      (function () {
+        var btn = document.querySelector(".nav-toggle");
+        var nav = document.getElementById("site-nav");
+        if (!btn || !nav) return;
+        btn.addEventListener("click", function () {
+          var open = nav.classList.toggle("is-open");
+          btn.setAttribute("aria-expanded", open ? "true" : "false");
+          btn.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+        });
+      })();
+    </script>
+  </body>
+</html>

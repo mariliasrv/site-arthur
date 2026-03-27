@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Painel Administrativo</h1>
+        <p>Entre com seu usuário e senha para gerenciar a lista.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="modal-message" style="background:#fff7f7;border-color:#f2c2c2;">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('admin.login_post') }}">
+          <label for="username" style="display:block;font-weight:700;margin-top:0.85rem;">Usuário</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            required
+          />
+
+          <label for="password" style="display:block;font-weight:700;margin-top:0.85rem;">Senha</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          />
+
+          <button class="btn btn-primary" type="submit">Entrar</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
+

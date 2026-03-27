@@ -1,0 +1,249 @@
+{% extends "public/base.html" %}
+
+{% block title %}Lista de presentes | A chegada do Arthur{% endblock %}
+
+{% block content %}
+<header class="page-header page-header--gifts">
+  <p class="page-kicker-row">
+    <span class="page-kicker-line" aria-hidden="true"></span>
+    <span class="page-kicker-text"></span>
+    <span class="page-kicker-line" aria-hidden="true"></span>
+  </p>
+  <h1>Lista de presentes</h1>
+  <p class="page-lede">
+    Se você gostará de celebrar este momento especial conosco, reunimos algumas sugestões de presentes aqui.
+    A maioria possui um link direto para a loja; ao reservar nesta página, você ajuda a evitar duplicidades.
+  </p>
+</header>
+
+<div class="ornate-divider" role="presentation" aria-hidden="true">
+  <span class="ornate-divider__line"></span>
+  <span class="ornate-divider__center"></span>
+  <span class="ornate-divider__line"></span>
+</div>
+
+<section class="frame-card frame-card--notice diaper-notice" aria-label="Aviso sobre fraldas">
+  <p>
+    🌿 Optamos por usar fraldas ecológicas no dia a dia, por serem mais sustentáveis e gentis com a pele do bebê.
+  </p>
+  <p>
+    Em viagens, podemos usar descartáveis ocasionalmente, mas pedimos com carinho que não nos presenteiem com fraldas descartáveis.
+  </p>
+  <p>
+    Se quiserem contribuir, sugerimos os forros descartáveis, que ajudam muito na hora de descartar o cocô 💛
+  </p>
+</section>
+
+<section class="gifts-grid" aria-label="Lista de presentes">
+  {% if gifts %}
+    {% for gift in gifts %}
+      <article class="gift-card frame-card">
+        <div class="gift-media">
+          {% if gift.external_url %}
+            <a
+              class="gift-image-link"
+              href="{{ gift.external_url }}"
+              target="_blank"
+              rel="noopener"
+              {% if not gift.image_url %}aria-label="Abrir página do produto: {{ gift.title }}"{% endif %}
+            >
+              {% if gift.image_url %}
+                <img class="gift-image" src="{{ gift.image_url }}" alt="Imagem do presente {{ gift.title }} — abre o site do produto" loading="lazy" />
+              {% else %}
+                <div class="gift-image gift-image--placeholder" role="img" aria-hidden="true"></div>
+              {% endif %}
+            </a>
+          {% else %}
+            {% if gift.image_url %}
+              <img class="gift-image" src="{{ gift.image_url }}" alt="Imagem do presente {{ gift.title }}" loading="lazy" />
+            {% else %}
+              <div class="gift-image gift-image--placeholder" role="img" aria-label=""></div>
+            {% endif %}
+          {% endif %}
+        </div>
+        <h2 class="gift-title">
+          {% if gift.external_url %}
+            <a class="gift-title-link" href="{{ gift.external_url }}" target="_blank" rel="noopener">{{ gift.title }}</a>
+          {% else %}
+            {{ gift.title }}
+          {% endif %}
+        </h2>
+        <ul class="gift-details">
+          {% if gift.price_label %}
+            <li><span class="gift-detail-label">Valor:</span> {{ gift.price_label }}</li>
+          {% endif %}
+          <li>{{ gift.description or "Presente especial para o bebê." }}</li>
+        </ul>
+        {% if gift.status == "available" %}
+          <div class="gift-card-actions">
+            {% if gift.external_url %}
+              <a
+                class="gift-action-btn"
+                href="{{ gift.external_url }}"
+                target="_blank"
+                rel="noopener"
+                aria-label="Comprar: abrir site do produto {{ gift.title }}"
+              >Comprar</a>
+            {% endif %}
+            <button type="button" class="gift-action-btn" data-gift-id="{{ gift.id }}">Marcar como comprado</button>
+          </div>
+        {% elif gift.status == "reserved" %}
+          <div class="gift-card-actions">
+            {% if gift.external_url %}
+              <a
+                class="gift-action-btn"
+                href="{{ gift.external_url }}"
+                target="_blank"
+                rel="noopener"
+                aria-label="Comprar: abrir site do produto {{ gift.title }}"
+              >Comprar</a>
+            {% endif %}
+            <span class="gift-action-btn gift-action-btn--state" role="status">Já reservado</span>
+          </div>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% else %}
+    <article class="frame-card">
+      <p>A lista de presentes será publicada em breve.</p>
+    </article>
+  {% endif %}
+</section>
+
+<section id="reservation-overlay" class="modal-overlay" hidden>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="reservation-title">
+    <button id="reservation-close" type="button" class="modal-close" aria-label="Fechar">×</button>
+    <h2 id="reservation-title">Marcar como comprado</h2>
+
+    <form id="reservation-form" class="modal-form">
+      <label for="reservation-name">Seu nome</label>
+      <input
+        id="reservation-name"
+        name="name"
+        type="text"
+        inputmode="text"
+        autocomplete="name"
+        required
+      />
+
+      <label for="reservation-phone">Telefone</label>
+      <input
+        id="reservation-phone"
+        name="phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        required
+      />
+
+      <label for="reservation-message-opt">Mensagem (opcional)</label>
+      <textarea
+        id="reservation-message-opt"
+        name="message_opt"
+        rows="3"
+      ></textarea>
+
+      <div id="reservation-message" class="modal-message" role="status" aria-live="polite"></div>
+
+      <button class="btn btn-primary" type="submit">Confirmar</button>
+      <button id="reservation-cancel" class="btn btn-ghost" type="button">Cancelar</button>
+    </form>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const overlay = document.getElementById('reservation-overlay');
+    const closeBtn = document.getElementById('reservation-close');
+    const cancelBtn = document.getElementById('reservation-cancel');
+    const form = document.getElementById('reservation-form');
+    const messageEl = document.getElementById('reservation-message');
+
+    const nameEl = document.getElementById('reservation-name');
+    const phoneEl = document.getElementById('reservation-phone');
+    const msgEl = document.getElementById('reservation-message-opt');
+
+    let selectedGiftId = null;
+
+    function setMessage(text) {
+      messageEl.textContent = text || '';
+    }
+
+    function openModal(giftId) {
+      selectedGiftId = giftId;
+      setMessage('');
+      form.reset();
+      overlay.hidden = false;
+      // Focus the first field for mobile UX.
+      setTimeout(() => nameEl.focus(), 50);
+    }
+
+    function closeModal() {
+      selectedGiftId = null;
+      overlay.hidden = true;
+      setMessage('');
+    }
+
+    document.querySelectorAll('[data-gift-id]').forEach((btn) => {
+      btn.addEventListener('click', () => openModal(btn.dataset.giftId));
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = nameEl.value.trim();
+      const phone = phoneEl.value.trim();
+      const message_opt = msgEl.value.trim();
+
+      if (!selectedGiftId) {
+        setMessage('Selecione um presente válido para reservar.');
+        return;
+      }
+      if (name.length < 2) {
+        setMessage('Informe seu nome (mínimo 2 caracteres).');
+        return;
+      }
+      if (!phone) {
+        setMessage('Informe um telefone válido.');
+        return;
+      }
+
+      setMessage('Enviando... Aguarde um instante.');
+
+      try {
+        const res = await fetch('/reservations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gift_id: selectedGiftId,
+            name,
+            phone,
+            message_opt: message_opt || null,
+          }),
+        });
+
+        const data = await res.json().catch(() => null);
+        if (res.ok && data && data.success) {
+          setMessage('Reserva confirmada. Obrigada!');
+          setTimeout(() => window.location.reload(), 800);
+          return;
+        }
+
+        const errorMsg =
+          (data && data.error && (data.error.title ? (data.error.title + ' - ' + data.error.message) : data.error.message)) ||
+          'Não foi possível enviar sua reserva. Tente novamente.';
+        setMessage(errorMsg);
+      } catch (err) {
+        setMessage('Falha na conexão. Tente novamente em instantes.');
+      }
+    });
+  })();
+</script>
+{% endblock %}
+

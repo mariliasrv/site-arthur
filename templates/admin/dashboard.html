@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Dashboard Administrativo</h1>
+        <p class="site-subtitle">Controle manual de presentes e reservas.</p>
+
+        <p style="margin-top:1rem;">
+          <a class="link" href="{{ url_for('admin.logout') }}">Sair</a>
+        </p>
+
+        <div style="margin-top:1rem;">
+          <a class="btn btn-reserve" href="{{ url_for('admin.gift_new_get') }}" style="max-width:none;display:block;">Novo presente</a>
+        </div>
+
+        <section class="gifts-grid" style="margin-top:1rem;">
+          {% if gifts %}
+            {% for gift in gifts %}
+              <article class="gift-card">
+                <p class="site-subtitle" style="margin:0 0 0.35rem;font-size:0.85rem;">Ordem na lista: {{ gift.sort_order }}</p>
+                <h2>{{ gift.title }}</h2>
+                {% if gift.image_url %}
+                  <img class="gift-image-admin" src="{{ gift.image_url }}" alt="Imagem do presente {{ gift.title }}" loading="lazy" />
+                {% endif %}
+                {% if gift.price_label %}
+                  <p style="margin:0.25rem 0;font-weight:600;">Valor: {{ gift.price_label }}</p>
+                {% endif %}
+                <p>{{ gift.description or "" }}</p>
+                <span class="badge badge-{{ gift.status }}">
+                  {% if gift.status == "available" %}Disponível{% elif gift.status == "reserved" %}Reservado{% else %}Oculto{% endif %}
+                </span>
+
+                {% set active = active_reservations.get(gift.id) %}
+                {% if active %}
+                  <div class="modal-message" style="margin-top:0.75rem;">
+                    <div><strong>Reserva ativa</strong></div>
+                    <div>{{ active.name }} • {{ active.phone }}</div>
+                    <div style="color:var(--muted);margin-top:0.25rem;">
+                      {{ active.message_opt or "" }}
+                    </div>
+                  </div>
+                {% endif %}
+
+                <div class="actions-row">
+                  <form method="post" action="{{ url_for('admin.toggle_visibility', gift_id=gift.id) }}">
+                    <button class="btn btn-ghost" type="submit">
+                      {% if gift.status == "hidden" %}Mostrar presente{% else %}Ocultar presente{% endif %}
+                    </button>
+                  </form>
+                </div>
+
+                <div class="actions-row">
+                  <a class="btn btn-ghost" href="{{ url_for('admin.gift_edit_get', gift_id=gift.id) }}" style="text-decoration:none;">Editar</a>
+                </div>
+
+                <div class="actions-row">
+                  <form method="post" action="{{ url_for('admin.gift_delete', gift_id=gift.id) }}">
+                    <button class="btn btn-ghost" type="submit" style="border-color:#f1b7b7;background:#fff;">
+                      Excluir
+                    </button>
+                  </form>
+                </div>
+
+                {% if active_reservations.get(gift.id) %}
+                  <div class="actions-row">
+                    <form method="post" action="{{ url_for('admin.clear_reservation', gift_id=gift.id) }}">
+                      <button class="btn btn-primary" type="submit">Limpar reserva</button>
+                    </form>
+                  </div>
+                {% endif %}
+              </article>
+            {% endfor %}
+          {% else %}
+            <article class="card">
+              <p>Nenhum presente cadastrado ainda.</p>
+            </article>
+          {% endif %}
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
+

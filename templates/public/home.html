@@ -1,0 +1,41 @@
+{% extends "public/base.html" %}
+
+{% block title %}Início | A chegada do Arthur{% endblock %}
+
+{% block content %}
+<section class="hero-frame hero-frame--home" aria-label="Mensagem principal">
+  <img
+    class="hero-image"
+    src="{{ url_for('static', filename='img/sapatinho.png') }}"
+    alt="Imagem com sapatinhos e espaço para mensagem"
+    loading="eager"
+  />
+  <div class="hero-text">
+    <div class="hero-text-inner">
+      <h1>A chegada do Arthur</h1>
+      <p>
+        É com imensa alegria e amor que aguardamos a chegada do nosso Arthur, e criamos este espaço para compartilhar um pouco desse momento especial com vocês.
+      </p>
+      <a class="btn btn-cta" href="{{ url_for('public.gifts') }}">Acessar lista de presentes</a>
+    </div>
+  </div>
+</section>
+
+<div class="ornate-divider" role="presentation" aria-hidden="true">
+  <span class="ornate-divider__line"></span>
+  <span class="ornate-divider__center"></span>
+  <span class="ornate-divider__line"></span>
+</div>
+
+<section class="frame-card frame-card--flourish">
+  <h2>Facilitamos nossa lista de presentes</h2>
+  <p>
+    Aqui vocês encontrarão sugestões de presentes que pensamos com muito carinho. Cada item possui um link direto para a loja.
+    Ao escolher um presente, é possível reservar na própria lista para evitar duplicidade e garantir que ninguém mais tenha o mesmo item.
+  </p>
+  <a class="btn btn-secondary" href="{{ url_for('public.gifts') }}">Ver lista de presentes</a>
+</section>
+
+
+{% endblock %}
+

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if gift %}Editar presente{% else %}Novo presente{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>{% if gift %}Editar presente{% else %}Novo presente{% endif %}</h1>
+        <p class="site-subtitle">
+          Preencha título e, se quiser, descrição, link da loja e URL de uma imagem (copie o endereço da foto na internet).
+          Para remover link ou imagem, deixe o campo em branco e salve. A ordem na lista pública usa o número abaixo (menor = mais acima).
+        </p>
+
+        <form
+          method="post"
+          action="{% if gift %}{{ url_for('admin.gift_edit_post', gift_id=gift.id) }}{% else %}{{ url_for('admin.gift_new_post') }}{% endif %}"
+        >
+          <label for="title">Título</label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            required
+            value="{{ gift.title if gift else '' }}"
+          />
+
+          <label for="description">Descrição (opcional)</label>
+          <textarea id="description" name="description" rows="4">{{ gift.description if gift and gift.description else '' }}</textarea>
+
+          <label for="price_label">Valor (opcional)</label>
+          <input
+            id="price_label"
+            name="price_label"
+            type="text"
+            inputmode="text"
+            maxlength="120"
+            placeholder="Ex.: R$ 89,90 ou R$ 70 – R$ 140"
+            value="{{ gift.price_label if gift and gift.price_label else '' }}"
+          />
+
+          <label for="sort_order">Ordem na lista (opcional)</label>
+          <input
+            id="sort_order"
+            name="sort_order"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            max="9999"
+            step="1"
+            value="{{ gift.sort_order if gift else 0 }}"
+          />
+
+          <label for="external_url">Link externo (opcional)</label>
+          <input
+            id="external_url"
+            name="external_url"
+            type="url"
+            inputmode="url"
+            placeholder="https://..."
+            value="{{ gift.external_url if gift and gift.external_url else '' }}"
+          />
+
+          <label for="image_url">Imagem (URL opcional)</label>
+          <input
+            id="image_url"
+            name="image_url"
+            type="url"
+            inputmode="url"
+            placeholder="https://..."
+            value="{{ gift.image_url if gift and gift.image_url else '' }}"
+          />
+
+          {% if gift and gift.image_url %}
+            <div style="margin-top:1rem;">
+              <div class="site-subtitle" style="margin-bottom:0.5rem;">Pré-visualização:</div>
+              <img
+                class="gift-image-admin"
+                src="{{ gift.image_url }}"
+                alt="Imagem do presente"
+                loading="lazy"
+              />
+            </div>
+          {% endif %}
+
+          <div style="margin-top:1rem;">
+            <button class="btn btn-primary" type="submit">Salvar</button>
+          </div>
+
+          <div style="margin-top:0.75rem;">
+            <a class="btn btn-ghost" href="{{ url_for('admin.dashboard') }}">Voltar</a>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
+
