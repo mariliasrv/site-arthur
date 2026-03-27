@@ -14,6 +14,20 @@
   --border: rgba(166, 138, 90, 0.4);
   --font-display: "Playfair Display", Georgia, serif;
   --font-body: "Lora", Georgia, serif;
+
+  /* Hero no celular: texto só na faixa clara (edite aqui para afinar) */
+  --hero-m-right-min: 0.5rem;
+  --hero-m-right-pref: 4vw;
+  --hero-m-right-max: 1rem;
+  --hero-m-top-min: 32%;
+  --hero-m-top-mid: 26vh;
+  --hero-m-top-max: 50%;
+  --hero-m-text-width-pct: 56%;
+  --hero-m-text-width-max: 15.5rem;
+  --hero-m-p-size: 0.92rem;
+  --hero-m-h1-min: 1.35rem;
+  --hero-m-h1-vw: 5vw;
+  --hero-m-h1-max: 1.65rem;
 }
 
 * {
@@ -702,6 +716,35 @@ button.gift-action-btn {
 
 .btn-cta {
   align-self: center;
+}
+
+/* Celular: texto só na faixa clara (direita da imagem), não sobre o verde escuro */
+@media (max-width: 719px) {
+  .hero-text-inner {
+    left: auto;
+    right: clamp(
+      var(--hero-m-right-min),
+      var(--hero-m-right-pref),
+      var(--hero-m-right-max)
+    );
+    top: clamp(var(--hero-m-top-min), var(--hero-m-top-mid), var(--hero-m-top-max));
+    transform: translateY(-50%);
+    width: min(var(--hero-m-text-width-pct), var(--hero-m-text-width-max));
+    align-items: center;
+  }
+
+  .hero-text p {
+    max-width: 100%;
+    font-size: var(--hero-m-p-size);
+  }
+
+  .hero-text h1 {
+    font-size: clamp(
+      var(--hero-m-h1-min),
+      var(--hero-m-h1-vw),
+      var(--hero-m-h1-max)
+    );
+  }
 }
 
 /* Modal */

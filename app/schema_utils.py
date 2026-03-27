@@ -5,11 +5,18 @@ from sqlalchemy import text
 from app.extensions import db
 
 
+def _sqlite_only() -> bool:
+    return db.engine.dialect.name == "sqlite"
+
+
 def ensure_gift_image_url_column() -> None:
     """
     Dev-time schema helper for SQLite:
     if Gift.image_url column doesn't exist yet, add it.
     """
+
+    if not _sqlite_only():
+        return
 
     with db.engine.connect() as conn:
         result = conn.execute(text("PRAGMA table_info(gift)")).fetchall()
@@ -23,6 +30,9 @@ def ensure_gift_image_url_column() -> None:
 
 
 def ensure_gift_sort_order_column() -> None:
+    if not _sqlite_only():
+        return
+
     with db.engine.connect() as conn:
         result = conn.execute(text("PRAGMA table_info(gift)")).fetchall()
         cols = {row[1] for row in result}
@@ -33,6 +43,9 @@ def ensure_gift_sort_order_column() -> None:
 
 
 def ensure_gift_price_label_column() -> None:
+    if not _sqlite_only():
+        return
+
     with db.engine.connect() as conn:
         result = conn.execute(text("PRAGMA table_info(gift)")).fetchall()
         cols = {row[1] for row in result}
